@@ -1,0 +1,8 @@
+v: 0
+micros:
+  - name: studio-directory
+    src: .
+    engine: python3.9
+    primary: true
+    public: true
+    run: gunicorn app:app
