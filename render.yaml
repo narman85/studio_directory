@@ -2,9 +2,13 @@ services:
   - type: web
     name: studio-directory
     env: python
+    region: frankfurt
+    plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn wsgi:application
+    startCommand: gunicorn wsgi:application --bind 0.0.0.0:$PORT
     envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.0
       - key: FLASK_SECRET_KEY
         value: 304e7939aba5829dd992617171694b46a1318be2aaec20c9b7a3e2cc49dd1685
       - key: SUPABASE_URL

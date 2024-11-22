@@ -11,7 +11,13 @@ def create_app():
     app = Flask(__name__, 
                 static_folder='../static',
                 template_folder='../templates')
-    app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY')
+    
+    # Set up environment variables
+    app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'default-secret-key')
+    app.config['SUPABASE_URL'] = os.environ.get('SUPABASE_URL')
+    app.config['SUPABASE_KEY'] = os.environ.get('SUPABASE_KEY')
+    app.config['ADMIN_USERNAME'] = os.environ.get('ADMIN_USERNAME', 'admin')
+    app.config['ADMIN_PASSWORD'] = os.environ.get('ADMIN_PASSWORD', '1234')
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
     
     # Initialize WhiteNoise for serving static files
@@ -23,8 +29,8 @@ def create_app():
     login_manager.login_view = 'admin_login'
     
     supabase: Client = create_client(
-        os.getenv('SUPABASE_URL'),
-        os.getenv('SUPABASE_KEY')
+        app.config['SUPABASE_URL'],
+        app.config['SUPABASE_KEY']
     )
     
     from app import routes
