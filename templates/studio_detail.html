@@ -1,0 +1,310 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8">
+            {% if studio.studio_images and studio.studio_images|length > 0 %}
+                <div class="main-image-container mb-3">
+                    <img src="{{ url_for('static', filename=studio.studio_images[0].image_path) }}"
+                         alt="{{ studio.name }}"
+                         id="mainImage"
+                         class="studio-image">
+                    
+                    {% if studio.studio_images|length > 1 %}
+                        <button class="image-nav-btn prev-btn" onclick="navigateImage('prev')">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="image-nav-btn next-btn" onclick="navigateImage('next')">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    {% endif %}
+                </div>
+                
+                {% if studio.studio_images|length > 1 %}
+                    <div class="thumbnails-container">
+                        <div class="thumbnails-scroll">
+                            <div class="thumbnails-wrapper">
+                                {% for image in studio.studio_images %}
+                                    <img src="{{ url_for('static', filename=image.image_path) }}"
+                                         alt="{{ studio.name }}"
+                                         class="studio-thumbnail {% if loop.index0 == 0 %}active{% endif %}"
+                                         onclick="changeMainImage(this, '{{ url_for('static', filename=image.image_path) }}')"
+                                         loading="lazy">
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="studio-placeholder mb-3">
+                    <i class="fas fa-camera"></i>
+                </div>
+            {% endif %}
+        </div>
+        <div class="col-md-4">
+            <div class="studio-info card">
+                <div class="card-body">
+                    <h2 class="card-title">{{ studio.name }}</h2>
+                    <p class="card-text description">{{ studio.description }}</p>
+                    <p class="card-text"><strong>Address:</strong><br>{{ studio.address }}</p>
+                    <p class="card-text price-tag"><strong>Price:</strong><br>${{ "%.2f"|format(studio.price) }}/hour</p>
+                    <div class="mt-4">
+                        <button class="btn btn-primary" onclick="revealPhone('{{ studio.id }}', this)">
+                            Show Phone Number
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="mt-3">
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to Studios</a>
+    </div>
+</div>
+
+<style>
+.main-image-container {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #f8f9fa;
+}
+
+.studio-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background-color: #f8f9fa;
+    transition: opacity 0.3s ease;
+}
+
+.thumbnails-container {
+    margin-bottom: 2rem;
+}
+
+.thumbnails-scroll {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #dee2e6 #f8f9fa;
+}
+
+/* Webkit scrollbar styling */
+.thumbnails-scroll::-webkit-scrollbar {
+    height: 6px;
+}
+
+.thumbnails-scroll::-webkit-scrollbar-track {
+    background: #f8f9fa;
+    border-radius: 3px;
+}
+
+.thumbnails-scroll::-webkit-scrollbar-thumb {
+    background-color: #dee2e6;
+    border-radius: 3px;
+}
+
+.thumbnails-wrapper {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.25rem 0;
+}
+
+.studio-thumbnail {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+    flex-shrink: 0;
+}
+
+.studio-thumbnail:hover {
+    opacity: 0.9;
+}
+
+.studio-thumbnail.active {
+    border-color: #0d6efd;
+}
+
+.studio-placeholder {
+    width: 100%;
+    height: 500px;
+    background-color: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+}
+
+.studio-placeholder i {
+    font-size: 3rem;
+    color: #adb5bd;
+}
+
+.image-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 2;
+}
+
+.image-nav-btn:hover {
+    background-color: rgba(255, 255, 255, 1);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.prev-btn {
+    left: 16px;
+}
+
+.next-btn {
+    right: 16px;
+}
+
+.image-nav-btn i {
+    font-size: 1rem;
+    color: #212529;
+}
+
+@media (max-width: 768px) {
+    .main-image-container {
+        height: 300px;
+    }
+    
+    .studio-thumbnail {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .image-nav-btn {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .prev-btn {
+        left: 8px;
+    }
+    
+    .next-btn {
+        right: 8px;
+    }
+}
+</style>
+
+<script>
+let currentImageIndex = 0;
+const images = [
+    {% for image in studio.studio_images %}
+        "{{ url_for('static', filename=image.image_path) }}"{% if not loop.last %},{% endif %}
+    {% endfor %}
+];
+
+function navigateImage(direction) {
+    const totalImages = images.length;
+    
+    if (direction === 'next') {
+        currentImageIndex = (currentImageIndex + 1) % totalImages;
+    } else {
+        currentImageIndex = (currentImageIndex - 1 + totalImages) % totalImages;
+    }
+    
+    // Update main image with fade effect
+    const mainImage = document.getElementById('mainImage');
+    mainImage.style.opacity = '0';
+    
+    setTimeout(() => {
+        mainImage.src = images[currentImageIndex];
+        mainImage.style.opacity = '1';
+    }, 300);
+    
+    // Update active thumbnail
+    document.querySelectorAll('.studio-thumbnail').forEach((thumb, index) => {
+        if (index === currentImageIndex) {
+            thumb.classList.add('active');
+        } else {
+            thumb.classList.remove('active');
+        }
+    });
+}
+
+function changeMainImage(thumbnail, newSrc) {
+    // Update current index
+    currentImageIndex = Array.from(thumbnail.parentElement.children).indexOf(thumbnail);
+    
+    // Update main image
+    const mainImage = document.getElementById('mainImage');
+    mainImage.style.opacity = '0';
+    
+    setTimeout(() => {
+        mainImage.src = newSrc;
+        mainImage.style.opacity = '1';
+    }, 300);
+    
+    // Update active thumbnail
+    document.querySelectorAll('.studio-thumbnail').forEach(thumb => {
+        thumb.classList.remove('active');
+    });
+    thumbnail.classList.add('active');
+    
+    // Scroll thumbnail into view if needed
+    thumbnail.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+}
+
+function revealPhone(studioId, button) {
+    button.disabled = true;
+    button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+    
+    fetch(`/api/studio/${studioId}/reveal-phone`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            button.innerHTML = 'Error: ' + data.error;
+            button.classList.remove('btn-primary');
+            button.classList.add('btn-danger');
+        } else {
+            button.innerHTML = '<i class="fas fa-phone"></i> ' + data.phone;
+            button.classList.remove('btn-primary');
+            button.classList.add('btn-success');
+        }
+    })
+    .catch(error => {
+        button.innerHTML = 'Error: Please try again';
+        button.classList.remove('btn-primary');
+        button.classList.add('btn-danger');
+        button.disabled = false;
+    });
+}
+
+// Add keyboard navigation
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'ArrowLeft') {
+        navigateImage('prev');
+    } else if (event.key === 'ArrowRight') {
+        navigateImage('next');
+    }
+});
+</script>
+{% endblock %}

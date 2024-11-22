@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-3">
+    <h1 class="h3 mb-4">Photo Studios</h1>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="row g-3">
+        {% for studio in studios %}
+        <div class="col-12 col-md-6 col-lg-4">
+            <a href="{{ url_for('studio_detail', studio_id=studio.id) }}" class="text-decoration-none">
+                <div class="card studio-card shadow-sm">
+                    <div class="studio-image-container">
+                        {% if studio.studio_images and studio.studio_images|length > 0 %}
+                            <img src="{{ url_for('static', filename=studio.studio_images[0].image_path) }}"
+                                 alt="{{ studio.name }}"
+                                 class="studio-image"
+                                 loading="lazy">
+                        {% else %}
+                            <div class="studio-placeholder">
+                                <i class="fas fa-camera"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="studio-details">
+                        <h5 class="studio-name">{{ studio.name }}</h5>
+                        <p class="studio-address">{{ studio.address }}</p>
+                        <p class="studio-price">${{ "%.2f"|format(studio.price|float) }}/hour</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+.studio-card {
+    transition: transform 0.2s ease-in-out;
+    height: 100%;
+    border: none;
+    background: white;
+}
+
+.studio-card:hover {
+    transform: translateY(-5px);
+}
+
+.studio-image-container {
+    position: relative;
+    width: 100%;
+    padding-top: 66.67%; /* 3:2 Aspect Ratio */
+    overflow: hidden;
+    border-radius: 8px 8px 0 0;
+    background-color: #f8f9fa;
+}
+
+.studio-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Changed back to cover */
+    object-position: center 20%; /* Adjusted to show faces better */
+}
+
+.studio-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.studio-placeholder i {
+    font-size: 1.5rem;
+    color: #adb5bd;
+}
+
+.studio-details {
+    padding: 0.75rem;
+}
+
+.studio-name {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: #212529;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.studio-address {
+    font-size: 0.813rem;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.studio-price {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #198754;
+    margin-bottom: 0;
+}
+
+/* Responsive adjustments */
+@media (min-width: 768px) {
+    .col-md-6 {
+        flex: 0 0 auto;
+        width: 33.33333%;
+    }
+}
+
+@media (min-width: 992px) {
+    .col-lg-4 {
+        flex: 0 0 auto;
+        width: 25%;
+    }
+}
+</style>
+{% endblock %}
