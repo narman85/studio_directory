@@ -2,20 +2,8 @@ services:
   - type: web
     name: studio-directory
     env: python
-    region: frankfurt
-    plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn wsgi:application --bind 0.0.0.0:$PORT
+    startCommand: gunicorn app:app
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.0
-      - key: FLASK_SECRET_KEY
-        value: 304e7939aba5829dd992617171694b46a1318be2aaec20c9b7a3e2cc49dd1685
-      - key: SUPABASE_URL
-        value: https://gscwvgszwcdsqxvhiolw.supabase.co
-      - key: SUPABASE_KEY
-        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdzY3d2Z3N6d2Nkc3F4dmhpb2x3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzIyNTcyNzksImV4cCI6MjA0NzgzMzI3OX0.EGq_8rUqOsbQ3eykExdoGvCuH5QAahUKrXiHuAvWJAo
-      - key: ADMIN_USERNAME
-        value: admin
-      - key: ADMIN_PASSWORD
-        value: 1234
